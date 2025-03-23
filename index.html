@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Le Voyage de YuanYuan</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: #fff;
+            text-align: center;
+            line-height: 1.6;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        h1 {
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .chinese {
+            font-weight: normal;
+            margin-left: 10px;
+        }
+        
+        .message-box {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #c9171e;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .message-count {
+            color: #ffcc00;
+            font-size: 20px;
+            margin: 0 0 10px 0;
+        }
+        
+        #message {
+            font-size: 18px;
+        }
+        
+        .garden {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(to bottom, #16213e, #0f3460);
+            border: 2px solid #c9171e;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        .player {
+            position: absolute;
+            font-size: 50px;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            transition: all 0.2s ease;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .lantern {
+            position: absolute;
+            font-size: 40px;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            transition: all 0.3s ease;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .instruction {
+            font-size: 16px;
+            margin: 10px 0;
+            opacity: 0.8;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            max-width: 600px;
+            background-color: rgba(26, 26, 46, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #ffcc00;
+            text-align: center;
+        }
+        
+        .modal h2 {
+            color: #ffcc00;
+            font-size: 24px;
+            margin-top: 0;
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .restart-btn {
+            padding: 15px 30px;
+            background: linear-gradient(to bottom, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        /* Particle animation */
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-50px) rotate(360deg); opacity: 0; }
+        }
+        
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: float 2s linear forwards;
+            z-index: 20;
+        }
+        
+        /* Joystick styling */
+        .joystick-base {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .joystick-stick {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+            z-index: 51;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Le Voyage de YuanYuan <span class="chinese">袁媛</span></h1>
+        
+        <div class="message-box">
+            <p class="message-count">🏮 Lanternes: <span id="lantern-count">0</span> / 8</p>
+            <p id="message">Retrouve la personne que tu aimes</p>
+        </div>
+        
+        <div class="garden" id="garden">
+            <div class="player" id="player">👧</div>
+            <!-- Lanterns will be added by JavaScript -->
+            
+            <!-- Joystick will be added dynamically -->
+        </div>
+        
+        <p class="instruction">Touchez l'écran pour faire apparaître un joystick et déplacez YuanYuan</p>
+    </div>
+    
+    <div class="modal" id="final-modal">
+        <div class="modal-content">
+            <h2>Je t'aime et je suis désolé</h2>
+            <p>À travers ce voyage symbolique, j'ai rassemblé tous nos souvenirs précieux. Comme ces lanternes qui illuminent la nuit, mon amour pour toi n'a jamais cessé de briller.</p>
+            <p>Je suis profondément désolé pour tout ce qui nous a séparés. Nos chemins se sont éloignés, mais mon cœur reste avec toi. Donnons-nous une nouvelle chance de retrouver cette harmonie qui nous rendait si heureux.</p>
+            <p>Je t'attendrai, aussi longtemps qu'il le faudra.</p>
+            <button class="restart-btn" id="restart-btn">Recommencer</button>
+        </div>
+    </div>
+    
+    <script>
+        // Game elements
+        const garden = document.getElementById('garden');
+        const player = document.getElementById('player');
+        const message = document.getElementById('message');
+        const lanternCount = document.getElementById('lantern-count');
+        const finalModal = document.getElementById('final-modal');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        // Game variables
+        let playerX = 50;
+        let playerY = 150;
+        const moveSpeed = 3; // Speed multiplier for joystick
+        let lanternsCollected = 0;
+        const totalLanterns = 8;
+        const lanterns = [];
+        
+        // Joystick variables
+        let joystickBase = null;
+        let joystickStick = null;
+        let joystickActive = false;
+        let joystickStartX = 0;
+        let joystickStartY = 0;
+        let joystickX = 0;
+        let joystickY = 0;
+        let joystickDeltaX = 0;
+        let joystickDeltaY = 0;
+        let animationFrameId = null;
+        
+        // Love messages to display when collecting lanterns
+        const messages = [
+            "Je pense à toi tous les jours...",
+            "Nos souvenirs me réchauffent le cœur",
+            "J'ai fait des erreurs que je regrette",
+            "Tu me manques tellement",
+            "Je veux reconstruire ce que nous avions",
+            "Je promets de faire mieux cette fois",
+            "Mon amour pour toi n'a jamais faibli",
+            "Retrouvons-nous et recommençons"
+        ];
+        
+        // Initialize game
+        function initGame() {
+            // Position player
+            updatePlayerPosition();
+            
+            // Create lanterns
+            createLanterns();
+            
+            // Set up event listeners
+            setupJoystick();
+            setupKeyboard();
+            
+            // Restart button
+            restartBtn.addEventListener('click', restartGame);
+            restartBtn.addEventListener('touchstart', restartGame, { passive: false });
+            
+            // Handle resize events
+            window.addEventListener('resize', onWindowResize);
+            
+            // Start animation loop
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Setup joystick controls
+        function setupJoystick() {
+            // Touch start - create joystick
+            garden.addEventListener('touchstart', startJoystick, { passive: false });
+            garden.addEventListener('mousedown', startJoystick);
+            
+            // Touch move - update joystick position
+            garden.addEventListener('touchmove', moveJoystick, { passive: false });
+            garden.addEventListener('mousemove', moveJoystick);
+            
+            // Touch end - remove joystick
+            garden.addEventListener('touchend', endJoystick, { passive: false });
+            garden.addEventListener('mouseup', endJoystick);
+            garden.addEventListener('mouseleave', endJoystick);
+        }
+        
+        // Setup keyboard controls as alternative
+        function setupKeyboard() {
+            document.addEventListener('keydown', handleKeyPress);
+        }
+        
+        // Start the joystick
+        function startJoystick(e) {
+            e.preventDefault();
+            
+            if (joystickActive) return;
+            
+            joystickActive = true;
+            
+            // Get touch/mouse coordinates
+            const coords = getTouchCoordinates(e);
+            joystickStartX = coords.x;
+            joystickStartY = coords.y;
+            
+            // Create joystick elements
+            createJoystickElements(joystickStartX, joystickStartY);
+            
+            // Set initial joystick position
+            joystickX = joystickStartX;
+            joystickY = joystickStartY;
+            joystickDeltaX = 0;
+            joystickDeltaY = 0;
+            
+            // Update joystick visuals
+            updateJoystickPosition();
+        }
+        
+        // Move the joystick
+        function moveJoystick(e) {
+            e.preventDefault();
+            
+            if (!joystickActive) return;
+            
+            // Get touch/mouse coordinates
+            const coords = getTouchCoordinates(e);
+            
+            // Calculate distance from joystick start point
+            const deltaX = coords.x - joystickStartX;
+            const deltaY = coords.y - joystickStartY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            // Limit joystick movement radius
+            const maxRadius = 40;
+            if (distance > maxRadius) {
+                const angle = Math.atan2(deltaY, deltaX);
+                joystickX = joystickStartX + maxRadius * Math.cos(angle);
+                joystickY = joystickStartY + maxRadius * Math.sin(angle);
+            } else {
+                joystickX = coords.x;
+                joystickY = coords.y;
+            }
+            
+            // Calculate movement delta
+            joystickDeltaX = (joystickX - joystickStartX) / maxRadius;
+            joystickDeltaY = (joystickY - joystickStartY) / maxRadius;
+            
+            // Update joystick visuals
+            updateJoystickPosition();
+        }
+        
+        // End the joystick
+        function endJoystick(e) {
+            e.preventDefault();
+            
+            if (!joystickActive) return;
+            
+            joystickActive = false;
+            joystickDeltaX = 0;
+            joystickDeltaY = 0;
+            
+            // Remove joystick elements
+            if (joystickBase && joystickBase.parentNode) {
+                joystickBase.parentNode.removeChild(joystickBase);
+            }
+            if (joystickStick && joystickStick.parentNode) {
+                joystickStick.parentNode.removeChild(joystickStick);
+            }
+            
+            joystickBase = null;
+            joystickStick = null;
+        }
+        
+        // Create joystick visual elements
+        function createJoystickElements(x, y) {
+            // Create base
+            joystickBase = document.createElement('div');
+            joystickBase.className = 'joystick-base';
+            joystickBase.style.left = (x - 60) + 'px';
+            joystickBase.style.top = (y - 60) + 'px';
+            
+            // Create stick
+            joystickStick = document.createElement('div');
+            joystickStick.className = 'joystick-stick';
+            
+            // Add to DOM
+            garden.appendChild(joystickBase);
+            garden.appendChild(joystickStick);
+        }
+        
+        // Update joystick position visually
+        function updateJoystickPosition() {
+            if (!joystickStick) return;
+            
+            joystickStick.style.left = (joystickX - 25) + 'px';
+            joystickStick.style.top = (joystickY - 25) + 'px';
+        }
+        
+        // Helper to get touch/mouse coordinates
+        function getTouchCoordinates(e) {
+            const rect = garden.getBoundingClientRect();
+            
+            if (e.touches && e.touches[0]) {
+                // Touch event
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
+            } else {
+                // Mouse event
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
+        }
+        
+        // Game loop for continuous movement
+        function gameLoop() {
+            // Move player based on joystick position
+            if (joystickActive) {
+                movePlayer(joystickDeltaX * moveSpeed, joystickDeltaY * moveSpeed);
+            }
+            
+            // Continue the loop
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        
+        // Handle keyboard input
+        function handleKeyPress(e) {
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                case 'q':
+                    movePlayer(-moveSpeed, 0);
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    movePlayer(moveSpeed, 0);
+                    break;
+                case 'ArrowUp':
+                case 'w':
+                case 'z':
+                    movePlayer(0, -moveSpeed);
+                    break;
+                case 'ArrowDown':
+                case 's':
+                    movePlayer(0, moveSpeed);
+                    break;
+            }
+        }
+        
+        // Create lanterns
+        function createLanterns() {
+            // Clear existing lanterns
+            lanterns.forEach(lantern => {
+                if (lantern.element && lantern.element.parentNode) {
+                    lantern.element.parentNode.removeChild(lantern.element);
+                }
+            });
+            lanterns.length = 0;
+            
+            // Dynamically position lanterns based on garden size
+            const gardenRect = garden.getBoundingClientRect();
+            const width = gardenRect.width;
+            const height = gardenRect.height;
+            
+            // Calculate positions to spread lanterns across the garden
+            const positions = [
+                { x: width * 0.2, y: height * 0.2 },
+                { x: width * 0.4, y: height * 0.3 },
+                { x: width * 0.6, y: height * 0.2 },
+                { x: width * 0.8, y: height * 0.3 },
+                { x: width * 0.1, y: height * 0.6 },
+                { x: width * 0.3, y: height * 0.7 },
+                { x: width * 0.5, y: height * 0.8 },
+                { x: width * 0.7, y: height * 0.6 }
+            ];
+            
+            // Create lanterns
+            positions.forEach((pos, index) => {
+                const lantern = document.createElement('div');
+                lantern.className = 'lantern';
+                lantern.innerHTML = '🏮';
+                lantern.style.left = pos.x + 'px';
+                lantern.style.top = pos.y + 'px';
+                garden.appendChild(lantern);
+                
+                lanterns.push({
+                    element: lantern,
+                    x: pos.x,
+                    y: pos.y,
+                    collected: false,
+                    index: index
+                });
+            });
+        }
+        
+        // Move player
+        function movePlayer(dx, dy) {
+            // Get garden dimensions
+            const gardenRect = garden.getBoundingClientRect();
+            
+            // Calculate new position
+            const newX = Math.max(25, Math.min(playerX + dx, gardenRect.width - 25));
+            const newY = Math.max(25, Math.min(playerY + dy, gardenRect.height - 25));
+            
+            playerX = newX;
+            playerY = newY;
+            
+            // Update player position on screen
+            updatePlayerPosition();
+            
+            // Check for lantern collection
+            checkLanternCollection();
+        }
+        
+        // Update player position
+        function updatePlayerPosition() {
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+        }
+        
+        // Check if player collected a lantern
+        function checkLanternCollection() {
+            lanterns.forEach(lantern => {
+                if (!lantern.collected) {
+                    // Calculate distance between player and lantern
+                    const dx = playerX - lantern.x;
+                    const dy = playerY - lantern.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // If close enough, collect lantern
+                    if (distance < 50) {
+                        collectLantern(lantern);
+                    }
+                }
+            });
+        }
+        
+        // Collect lantern
+        function collectLantern(lantern) {
+            lantern.collected = true;
+            lantern.element.style.opacity = '0';
+            lantern.element.style.transform = 'translate(-50%, -50%) scale(0)';
+            
+            // Create particle effect
+            createParticles(lantern.x, lantern.y);
+            
+            // Update lantern count
+            lanternsCollected++;
+            lanternCount.textContent = lanternsCollected;
+            
+            // Update message
+            message.textContent = messages[lantern.index];
+            
+            // Check if all lanterns collected
+            if (lanternsCollected === totalLanterns) {
+                setTimeout(showFinalMessage, 1000);
+            }
+        }
+        
+        // Create particle effect
+        function createParticles(x, y) {
+            const particles = ['✨', '⭐', '🌟', '💫', '🔆'];
+            
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+                particle.style.left = (x + (Math.random() * 60 - 30)) + 'px';
+                particle.style.top = (y + (Math.random() * 60 - 30)) + 'px';
+                particle.style.fontSize = (20 + Math.random() * 15) + 'px';
+                
+                garden.appendChild(particle);
+                
+                // Remove particle after animation completes
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 2000);
+            }
+        }
+        
+        // Show final message
+        function showFinalMessage() {
+            finalModal.style.display = 'flex';
+        }
+        
+        // Restart game
+        function restartGame(e) {
+            if (e) {
+                e.preventDefault();
+            }
+            
+            // Reset game state
+            lanternsCollected = 0;
+            lanternCount.textContent = '0';
+            message.textContent = "Retrouve la personne que tu aimes";
+            
+            // Reset player position
+            playerX = 50;
+            playerY = 150;
+            updatePlayerPosition();
+            
+            // Recreate lanterns
+            createLanterns();
+            
+            // Hide modal
+            finalModal.style.display = 'none';
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            // Re-position lanterns based on new garden size
+            createLanterns();
+            
+            // Re-position player in a visible area
+            const gardenRect = garden.getBoundingClientRect();
+            playerX = Math.min(playerX, gardenRect.width - 25);
+            playerY = Math.min(playerY, gardenRect.height - 25);
+            updatePlayerPosition();
+        }
+        
+        // Start game when page loads
+        window.onload = initGame;
+    </script>
+</body>
+</html>
